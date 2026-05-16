@@ -1,3 +1,3 @@
 columns:int = 16
 rows:int = 16
-bombs:int = 20
+bombs:int = 50

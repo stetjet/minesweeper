@@ -2,6 +2,7 @@ import customtkinter as ctk
 import random 
 from config import columns, rows, bombs
 from PIL import Image
+from tkinter import messagebox as mb
 
 square_count = columns * rows
 
@@ -40,6 +41,7 @@ bomb_seeds = []
 
 
 def play():
+    reset_button.configure(image=happy)
     global bomb_seeds
     bomb_seeds.clear()
     for child in game_frame.winfo_children():
@@ -191,17 +193,23 @@ class cell(ctk.CTkFrame):
 
 def lose_game():
     print('Sorry!')
+    reset_button.configure(image = game_over)
     for cell in game_frame.winfo_children():
         if cell.cell_value >=9 and cell.active:
             cell.button.destroy()
         cell.active = False
-
+    again = mb.askyesno('YOU LOSE', 'Play again?', parent=app)
+    if again:
+        play()
 
 def check_win():
     for cell in game_frame.winfo_children():
         if cell.cell_value >= 9 and cell.active:
             return print('Still some bombs to go!')
     print('YOU WIN!')
+    again = mb.askyesno('YOU WIN!', 'Play again?')
+    if again:
+        play()
 
 def check_cells(cell:cell):
     if not cell.active:
@@ -224,7 +232,7 @@ def check_cells(cell:cell):
 
 
 
-reset_button = ctk.CTkButton(header_frame, image = happy, command = lambda: play())
+reset_button = ctk.CTkButton(header_frame, image = happy, command = lambda: play(), height=0, width=0, text=None, fg_color = 'transparent')
 reset_button.grid(row=0,column=0)
 
 app.mainloop()
