@@ -1,8 +1,20 @@
 import customtkinter as ctk
 import random 
-from config import columns, rows, bombs
+# from config import columns, rows, bombs
 from PIL import Image
 from tkinter import messagebox as mb
+import json
+import tkinter as tk
+
+def get_settings():
+    with open('config.json', 'r') as config:
+        settings = json.load(config)
+        columns = settings['columns']
+        rows = settings['rows']
+        bombs = settings['bombs']
+    return columns, rows, bombs
+
+columns, rows, bombs = get_settings()
 
 square_count = columns * rows
 
@@ -228,11 +240,62 @@ def check_cells(cell:cell):
     check_win()
 
 
+def open_settings():
+    menu = ctk.CTkToplevel(app)
+    menu.attributes('-topmost', True)
+    columnsvar = tk.IntVar(value = columns)
+    rowsvar = tk.IntVar(value = rows)
+    bombsvar = tk.IntVar(value = bombs)
+    print(f'{type(columnsvar)=}')
+    print(f'{type(rowsvar)=}')
+    print(f'{type(bombsvar)=}')
+    column_frame = ctk.CTkFrame(menu)
+    column_frame.pack(anchor = 'w')
+    column_label = ctk.CTkLabel(column_frame, text = 'Columns:', width = 80)
+    column_label.grid(row = 0, column = 0, sticky = 'w')
+    column_entry = ctk.CTkEntry(column_frame, textvariable = columnsvar)
+    column_entry.grid(row = 0, column = 1, sticky = 'e')
+    row_frame = ctk.CTkFrame(menu)
+    row_frame.pack(anchor = 'w')
+    row_label = ctk.CTkLabel(row_frame, text = 'Rows:', width = 80)
+    row_label.grid(row = 0, column = 0, sticky = 'w')
+    row_entry = ctk.CTkEntry(row_frame, textvariable = rowsvar)
+    row_entry.grid(row = 0, column = 1, sticky = 'e')
+    bombs_frame = ctk.CTkFrame(menu)
+    bombs_frame.pack(anchor = 'w')
+    bombs_label = ctk.CTkLabel(bombs_frame, text = 'Bombs:', width = 80)
+    bombs_label.grid(row = 0, column = 0, sticky = 'w')
+    bombs_entry = ctk.CTkEntry(bombs_frame, textvariable = bombsvar)
+    bombs_entry.grid(row = 0, column = 1, sticky = 'e')
+    submission_frame = ctk.CTkFrame(menu)
+
+    def update_settings(bombs, rows, columns):
+        if 0 < bombs < (columns * rows) and 0 < columns <= 25 and 0 < rows <= 25:
+            new_settings = {'bombs':bombs, 'rows':rows, 'columns':columns}
+            with open('config.json', 'w') as config:
+                json.dump(new_settings, config)
+            menu.destroy()
+        else:
+            mb.showerror("Invalid entry", "Please enter values above zero and no more than 25 for columns and rows. There must be fewer bombs than total cells (columns x rows)")
+
+    submission_frame.pack()
+    submission_button = ctk.CTkButton(submission_frame, text = 'Save Settings', command= lambda: update_settings(int(bombs_entry.get()), int(row_entry.get()), int(column_entry.get())))
+    submission_button.pack(side='top')
 
 
 
 
 reset_button = ctk.CTkButton(header_frame, image = happy, command = lambda: play(), height=0, width=0, text=None, fg_color = 'transparent')
-reset_button.grid(row=0,column=0)
+reset_button.grid(row=0,column=1)
+
+
+
+    
+
+settings_button = ctk.CTkButton(header_frame, text='Settings', command = lambda: open_settings(), width = 30)
+settings_button.grid(row=0, column=0, sticky = 'w')
+
+
+
 
 app.mainloop()
